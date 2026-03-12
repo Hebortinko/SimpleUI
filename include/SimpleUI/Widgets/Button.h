@@ -1,18 +1,19 @@
 #pragma once
-#include "Core/Widget.h"
-#include "Core/Theme.h"
-#include "Core/Event.h"
-#include "Style/WidgetStyle.h"
-#include "Style/Presets.h"
+#include "SimpleUI/Core/Widget.h"
+#include "SimpleUI/Core/Theme.h"
+#include "SimpleUI/Core/Event.h"
+#include "SimpleUI/Style/WidgetStyle.h"
+#include "SimpleUI/Style/Presets.h"
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include <string>
+#include <optional>
 
 class Button : public Widget {
 
 private:
     sf::RectangleShape shape;
-    sf::Text           label;
+    std::optional<sf::Text> label;
 
     enum class State { Idle, Hovered, Pressed, Disabled };
     State state = State::Idle;
@@ -23,24 +24,24 @@ private:
     sf::Color txtColor   = sf::Color::White;
     sf::Color currentColor;
 
-    // Eventy – iné názvy ako public metódy
     Event<> onClickEvent;
     Event<> onHoverEvent;
     Event<> onPressEvent;
 
     void centerText() {
-        auto bounds = label.getLocalBounds();
-        label.setOrigin(bounds.position + bounds.size / 2.f);
-        label.setPosition(position + size / 2.f);
+        if (!label) return;
+        auto bounds = label->getLocalBounds();
+        label->setOrigin(bounds.position + bounds.size / 2.f);
+        label->setPosition(Widget::position + Widget::size / 2.f);
     }
 
     void onPositionChanged() override {
-        shape.setPosition(position);
+        shape.setPosition(Widget::position);
         centerText();
     }
 
     void onSizeChanged() override {
-        shape.setSize(size);
+        shape.setSize(Widget::size);
         centerText();
     }
 
@@ -50,20 +51,17 @@ public:
         setSize(sz);
 
         if (Theme::get().font) {
-            label.setFont(*Theme::get().font);
+            label.emplace(*Theme::get().font);
+            label->setString(text);
+            label->setCharacterSize(Theme::get().fontSize);
+            label->setFillColor(sf::Color::White);
         }
-        label.setString(text);
-        label.setCharacterSize(Theme::get().fontSize);
-        label.setFillColor(sf::Color::White);
 
         currentColor = bgColor;
         shape.setFillColor(currentColor);
         centerText();
     }
 
-    // ==================
-    // Povinné z Widget
-    // ==================
     void handleEvent(const sf::Event& event) override {
         if (!enabled || !visible) return;
 
@@ -111,20 +109,15 @@ public:
     void draw(sf::RenderWindow& window) const override {
         if (!visible) return;
         window.draw(shape);
-        window.draw(label);
+        if (label) window.draw(*label);
     }
 
-    // ==================
-    // Klasické settery
-    // ==================
     void setText(const std::string& t) {
-        label.setString(t);
-        centerText();
+        if (label) { label->setString(t); centerText(); }
     }
 
     void setFontSize(unsigned int s) {
-        label.setCharacterSize(s);
-        centerText();
+        if (label) { label->setCharacterSize(s); centerText(); }
     }
 
     void setDisabled(bool d) {
@@ -132,9 +125,6 @@ public:
         state = d ? State::Disabled : State::Idle;
     }
 
-    // ==================
-    // Chaining API
-    // ==================
     Button& position(sf::Vector2f pos) {
         setPosition(pos);
         return *this;
@@ -160,7 +150,6 @@ public:
         return *this;
     }
 
-    // Callbacky
     Button& onClick(std::function<void()> cb) {
         onClickEvent.connect(cb);
         return *this;
@@ -176,12 +165,11 @@ public:
         return *this;
     }
 
-    // Štýl
     Button& style(ButtonStyle s) {
         if (s.bgColor)   { bgColor   = *s.bgColor; }
         if (s.bgHover)   { bgHover   = *s.bgHover; }
         if (s.bgPressed) { bgPressed = *s.bgPressed; }
-        if (s.textColor) { txtColor  = *s.textColor; label.setFillColor(txtColor); }
+        if (s.textColor) { txtColor  = *s.textColor; if (label) label->setFillColor(txtColor); }
         currentColor = bgColor;
         shape.setFillColor(currentColor);
         return *this;

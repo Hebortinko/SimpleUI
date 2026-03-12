@@ -1,5 +1,24 @@
 # SimpleUI
 
+![demo](docs/demo.gif)
+
+> Three buttons, a live counter, ~15 lines of logic. Full source in [`examples/basic_button/main.cpp`](examples/basic_button/main.cpp).
+
+```cpp
+Button btnPlus ("+",     {0.f, 0.f}, {50.f, 40.f});
+Button btnMinus("-",     {0.f, 0.f}, {50.f, 40.f});
+Button btnReset("Reset", {0.f, 0.f}, {70.f, 40.f});
+
+btnPlus .style(Presets::Success());
+btnMinus.style(Presets::Danger());
+btnReset.style(Presets::Ghost());
+
+int counter = 0;
+btnPlus .onClick([&counter] { counter++; });
+btnMinus.onClick([&counter] { counter--; });
+btnReset.onClick([&counter] { counter = 0; });
+```
+
 A lightweight, header-only UI widget library for **SFML 3.0**, written in C++17.
 
 Built to make adding interactive UI elements to SFML applications quick and painless — no heavy frameworks, no dependencies beyond SFML itself.

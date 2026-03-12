@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Build
+build/
+cmake-build-*/
+
+# IDE
+.vscode/
+.idea/
+*.xcodeproj/
+*.xcworkspace/
+
+# Compiled
+*.o
+*.a
+*.dylib
+*.dll
+*.exe

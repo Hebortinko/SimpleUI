@@ -12,5 +12,6 @@ target_include_directories(SimpleUI INTERFACE
 option(SIMPLEUI_BUILD_EXAMPLES "Build examples" OFF)
 
 if(SIMPLEUI_BUILD_EXAMPLES)
-    add_subdirectory(examples/basic_button)
+    #add_subdirectory(examples/basic_button)
+    add_subdirectory(examples/basic_slider)
 endif()
